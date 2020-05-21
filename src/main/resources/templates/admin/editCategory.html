@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:include="include/admin/adminHeader::html('编辑分类')"></head>
+<body>
+<div th:replace="include/admin/adminNavigator::html"></div>
+<script>
+    $(function () {
+        var data4Vue = {
+            uri: "categories",
+            url: 'admin_category_list',
+            bean: {id: 0, name: ''},
+            file: ''
+        };
+
+        var vue = new Vue({
+                el: '#workingArea',
+                data: data4Vue,
+                mounted: function () {
+                    this.get();
+                },
+                methods: {
+                    get: function () {
+                        //获取路径上的 id 参数。
+                        var id = getUrlParms("id");
+                        //路径
+                        var uri = this.uri + "/" + id;
+                        //获取
+                        axios.get(uri).then(function (response) {
+                            //  this.bean = value.data;
+                            vue.bean = response.data;
+                        })
+                    },
+                    updateFun: function () {
+                        if (!checkEmpty(this.bean.name, "分类名称"))
+                            return;
+                        //地址
+                        var uri = this.uri + "/" + this.bean.id;
+                        //通过formData 格式传递 图片文件
+                        var formData = new FormData();
+                        formData.append("name", this.bean.name);
+                        formData.append("image", this.file);
+                        //axios 异步处理
+                        axios.put(uri, formData).then(function (value) {
+                            //获取catety_list.
+                            location.href = vue.url;
+                        })
+                    },
+                    getFile: function (event) {
+                        this.file = event.target.files[0];
+                    }
+
+                }
+
+            }
+        )
+    });
+
+
+</script>
+
+
+<div id="workingArea">
+
+    <ol class="breadcrumb">
+        <li><a href="admin_category_list">所有分类</a></li>
+        <li class="active">编辑分类</li>
+    </ol>
+
+    <div class="panel panel-warning editDiv">
+        <div class="panel-heading">编辑分类</div>
+        <div class="panel-body">
+            <table class="editTable">
+                <tr>
+                    <td>分类名称</td>
+                    <td><input @keyup.enter="updateFun" v-model.trim="bean.name" type="text" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>分类图片</td>
+                    <td>
+                        <input id="categoryPic" accept="image/*" type="file" name="image" @change="getFile($event)"/>
+                    </td>
+                </tr>
+                <tr class="submitTR">
+                    <td colspan="2" align="center">
+                        <input type="hidden" name="id" v-model.trim="bean.id">
+                        <a href="#nowhere" class="btn btn-success" @click="updateFun">提 交</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="include/admin/adminFooter::html"></div>
+</body>
+</html>

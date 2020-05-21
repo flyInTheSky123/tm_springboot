@@ -1,0 +1,30 @@
+<div class="pageDiv" th:fragment="html">
+    <!--分页-->
+    <nav>
+        <ul class="pagination">
+            <!--oagination.first判断当前是否是首页-->
+            <li :class="{ disabled: pagination.first }">
+                <a href="#nowhere" @click="jump('first')">«</a>
+            </li>
+            <!--当前是否有前一个-->
+            <li :class="{ disabled: !pagination.hasPrevious }">
+                <a href="#nowhere" @click="jump('pre')">‹</a>
+            </li>
+            <!--通过number,{active:pagination.number==i-1}处于选中状态。  -->
+            <li :class="{active:pagination.number==i-1}" v-for="i in pagination.navigatepageNums">
+                <a href="#nowhere" @click="jumpByNumber(i-1)">
+                    {{i}}
+                </a>
+            </li>
+
+            <!--//是否有 下一页 -->
+            <li :class="{ disabled: !pagination.hasNext }">
+                <a href="#nowhere" @click="jump('next')">›</a>
+            </li>
+            <!--是否是最后一页 -->
+            <li :class="{ disabled: pagination.last }">
+                <a href="#nowhere" @click="jump('last')">»</a>
+            </li>
+        </ul>
+    </nav>
+</div>

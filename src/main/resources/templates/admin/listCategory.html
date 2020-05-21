@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="include/admin/adminHeader::html('分类管理')"></head>
+<body>
+<div th:replace="include/admin/adminNavigator::html"></div>
+<script>
+    $(function () {
+        var data4Vue = {
+            uri: 'categories',
+            //用来存储分页信息
+            pagination: {},
+            //用来存储查询到的分类的信息
+            beans: [],
+            //用来存储文件名称
+            bean: {id: 0, name: ''},
+            //用来存储图片文件
+            file: null
+
+        };
+
+        //ViewModel
+        var vue = new Vue({
+            el: '#workingArea',
+            data: data4Vue,
+            mounted: function () { //mounted　表示这个 Vue 对象加载成功了
+                this.list(0);
+            },
+            methods: {
+                list: function (start) {
+                    var url = this.uri + "?start=" + start;
+                    axios.get(url).then(function (response) {
+                        vue.pagination = response.data;
+                        vue.beans = response.data.content;
+                    });
+                },
+                //通过 << <  > >>进行跳转
+                jump: function (page) {
+                    jump(page, vue); //定义在adminHeader.html 中
+                },
+                //通过 分页页数跳转
+                jumpByNumber: function (start) {
+                    jumpByNumber(start, vue);
+                },
+                //将图片文件 给 file.
+                getFile: function (event) {
+                    // target 事件属性可返回事件的目标节点（触发该事件的节点），如生成事件的元素、文档或窗口。
+                    this.file = event.target.files[0];
+
+
+                },
+                //添加分类名称，分类图片。
+                add: function () {
+                    //判断图片名称是否为空,checkEmpty()在adminHeader.html中定义了
+                    if (!checkEmpty(this.bean.name, "分类名称"))
+                        return;
+                    //判断图片文件是否为空,checkEmpty()在adminHeader.html中定义了
+                    if (!checkEmpty(this.file, "分类图片"))
+                        return;
+
+                    //数据
+                    var formData = new FormData();
+                    formData.append("name", this.bean.name);
+                    formData.append("image", this.file);
+
+                    //uri
+                    var uri = this.uri;
+                    //axios ,ajax框架
+                    axios.post(uri, formData).then(function (response) {
+                        //重新查询第一页数据。
+                        vue.list(0);
+                        //数据清除
+                        vue.bean = {id: 0, name: ''};
+                        $("#categoryPic").val('');
+                        vue.file = null;
+
+
+                    })
+
+
+                }
+                //删除分类信息。
+                , deleteBean: function (id) {
+                    // 组织url, 删除的规范是 /categoreis/123. 要这样写.
+                    //如果参数是id ,就要上面这样写。
+                    //如果不是,则var uri=this.uri+"?start"+start.
+                    var uri = this.uri + "/" + id;
+                    axios.delete(uri).then(function (response) {
+                        if (0 != response.data.length) {
+                            alert(response.data);
+
+                        } else {
+                            vue.list(0);
+                        }
+                    })
+                }
+
+            }
+        });
+    });
+
+</script>
+<div id="workingArea">
+    <h1 class="label label-info">分类管理</h1>
+    <br>
+    <br>
+    <div class="listDataTableDiv">
+        <table class="table table-striped table-bordered table-hover  table-condensed">
+            <thead>
+            <tr class="success">
+                <th>ID</th>
+                <th>图片</th>
+                <th>分类名称</th>
+                <th>属性管理</th>
+                <th>产品管理</th>
+                <th>编辑</th>
+                <th>删除</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="bean in beans ">
+                <td>{{bean.id}}</td>
+                <td>
+                    <img height="40px" :src="'img/category/'+bean.id+'.jpg'">
+                </td>
+                <td>
+                    {{bean.name}}
+                </td>
+                <td>
+                    <a :href="'admin_property_list?cid=' + bean.id "><span
+                            class="glyphicon glyphicon-th-list"></span></a>
+                </td>
+                <td>
+                    <a :href="'admin_product_list?cid=' + bean.id "><span
+                            class="glyphicon glyphicon-shopping-cart"></span></a>
+                </td>
+                <td>
+                    <a :href="'admin_category_edit?id=' + bean.id "><span class="glyphicon glyphicon-edit"></span></a>
+                </td>
+                <td>
+                    <a href="#nowhere" @click="deleteBean(bean.id)"><span
+                            class="   glyphicon glyphicon-trash"></span></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:replace="include/admin/adminPage::html"></div>
+    <div class="panel panel-warning addDiv">
+        <div class="panel-heading">新增分类</div>
+        <div class="panel-body">
+            <table class="addTable">
+                <tr>
+                    <td>分类名称</td>
+                    <!-- @keyup.enter="add" 键盘回车事件 调用add 函数-->
+                    <td><input @keyup.enter="add" v-model.trim="bean.name" type="text" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>分类图片</td>
+                    <td>
+                        <!--@change="getFile($event) ，发生变化时，就会调用getFile($event)函数-->
+                        <input id="categoryPic" accept="image/*" type="file" name="image" @change="getFile($event)"/>
+                    </td>
+                </tr>
+                <tr class="submitTR">
+                    <td colspan="2" align="center">
+                        <!--调用add -->
+                        <a href="#nowhere" @click="add" class="btn btn-success">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<div th:replace="include/admin/adminFooter::html"></div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<div th:fragment="html">
+    <div class="productReviewDiv" v-show="showReview" >
+        <div class="productReviewTopPart">
+            <!--当点击 "商品详情时" 触发"toggle2Detail" 函数，这个函数是为了 设置 showDetail=true 即显示商品详情，隐藏toggle2Review 评价 。
+              这个函数 是放在productPage.html 中-->
+            <!--当点击 "评价"时， 触发"toggle2Review" 函数，这个函数是为了 设置 showReview=true 即显示评价，隐藏toggle2Detail 评价 。
+        这个函数 是放在productPage.html 中-->
+            <a  href="#nowhere" class="productReviewTopPartSelectedLink" @click="toggle2Detail">商品详情</a>
+            <a  href="#nowhere" class="selected">累计评价 <span class="productReviewTopReviewLinkNumber">{{p.reviewCount}}</span> </a>
+        </div>
+
+        <div class="productReviewContentPart">
+            <div class="productReviewItem" v-for="r in reviews">
+                <div class="productReviewItemDesc">
+                    <div class="productReviewItemContent">
+                        {{r.content }}
+                    </div>
+                    <div class="productReviewItemDate">
+                        {{r.createDate|formatDateFilter('YYYY-MM-DD')}}
+                    </div>
+                </div>
+                <div class="productReviewItemUserInfo">
+                    {{r.user.anonymousName}}<span class="userInfoGrayPart">（匿名）</span>
+                </div>
+
+                <div style="clear:both"></div>
+            </div>
+        </div>
+    </div>
+</div>

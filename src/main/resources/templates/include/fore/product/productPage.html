@@ -1,0 +1,92 @@
+<div th:fragment="html">
+    <script>
+        $(function () {
+            var pid = getUrlParms("pid");
+            var data4Vue = {
+                uri: 'foreproduct',
+                p: '',
+                category: null,
+                firstProductImage: null,
+                pvs: [],
+                reviews: [],
+                //默认显示 商品详情 。
+                showDetail: true,
+                showReview: false,
+                user: {name: '', password: ''}
+            };
+            //ViewModel
+            var vue = new Vue({
+                el: '#workingArea',
+                data: data4Vue,
+                mounted: function () { //mounted　表示这个 Vue 对象加载成功了
+                    linkDefaultActions();
+                    this.load();
+
+                },
+                methods: {
+                    //加载，进行获取该产品的数据信息。
+                    load: function () {
+                        var url = this.uri + "/" + pid;
+                        axios.get(url).then(function (response) {
+                            var result = response.data;
+                            vue.p = result.data.product;
+                            vue.pvs = result.data.pvs;
+                            vue.reviews = result.data.reviews;
+                            vue.category = vue.p.category;
+                            vue.firstProductImage = vue.p.firstProductImage;
+                            vue.isNull(vue.p);
+                            vue.$nextTick(function () {
+                                imgAndInfoPageRegisterListeners(vue);
+
+                            })
+                        });
+
+                    },
+                    //显示商品详情 ，但点击"商品详情"时，设置 为true。
+                    toggle2Detail: function () {
+                        this.showDetail = true;
+                        this.showReview = false;
+                    },
+                    //显示评价 ，但点击"评价"时，设置 为true。
+                    toggle2Review: function () {
+                        this.showDetail = false;
+                        this.showReview = true;
+                    },
+                    isNull:function (p) {
+                        var stock = p.stock;
+                        if (stock == 0) {
+                            //库存为空，则改变"加入购物车"和"直接购买" 的类型：
+                            //隐藏加入购物车按钮
+                            $(".addCartButton").hide();
+
+                            // 修改"直接购买" 属性:
+                            $(".buyButton").html("库存已经空了！");
+                            //不能再被选中
+                            $(".buyButton").attr("disabled", "disable");
+                            //修改背景颜色
+                            $(".buyButton").css("background-color", "lightgray");
+                            $(".buyButton").css("border-color", "lightgray")
+                        }
+
+                    }
+
+                }
+            });
+
+        });
+    </script>
+
+    <title>模仿天猫官网 -- {{p.name}}</title>
+    <div class="categoryPictureInProductPageDiv">
+        <!--分类图片-->
+        <img v-if="category!=null" class="categoryPictureInProductPage" :src="'img/category/'+category.id+'.jpg'">
+    </div>
+    <div class="productPageDiv">
+        <!--商品信息 价格，title，num数量,购物车，购买等-->
+        <div th:replace="include/fore/product/imgAndInfo::html"></div>
+        <!--商品评价 信息-->
+        <div th:replace="include/fore/product/productReview::html"></div>
+        <!--商品详情 信息-->
+        <div th:replace="include/fore/product/productDetail::html"></div>
+    </div>
+</div>

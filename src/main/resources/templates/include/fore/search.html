@@ -1,0 +1,20 @@
+<div class th:fragment="html">
+    <a th:href="${application.contextPath}">
+        <img id="logo" src="img/site/logo.gif" class="logo">
+    </a>
+    <form action="search" method="get" >
+        <div class="searchDiv">
+            <input name="keyword" type="text" placeholder="时尚男鞋  太阳镜 ">
+            <button  type="submit" class="searchButton">搜索</button>
+            <div class="searchBelow">
+                <!--遍历分类 categories_below_search，使用index下标 进行选择哪些分类进行显示 ！-->
+                <!--th:if="${status.index>=5 && status.index<=8} 选择分类，只有符合条件的分类 才能显示 -->
+                <span th:each="c,status: ${application.categories_below_search}" th:if="${status.index>=5 && status.index<=8}">
+                    <a th:href="@{'category?cid='+${c.id}}" th:text="${c.name}" ></a>
+                    <span th:if="${status.index!=8}">|</span>
+                </span>
+
+            </div>
+        </div>
+    </form>
+</div>
