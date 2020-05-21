@@ -44,6 +44,7 @@ public class ProductController {
         Product product = productService.get(id);
         return product;
     }
+    //
 
     //添加产品
     @PostMapping("/products")
